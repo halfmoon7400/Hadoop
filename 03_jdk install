@@ -1,0 +1,36 @@
+# JWM을 위한 JDK 설치
+
+오라클 홈페이지에서 jdk8을 다운받고 서버로 이동시킨다. 다운 받은 jdk의 압축을 푼다  
+tar xvfz jdk-8u211-linux-x64.tar.gz jdk1.8.0_211/  
+
+압축을 푼 폴더를 /usr/lib/jvm/로 이동한다.  
+cd /usr/lib  
+sudo mkdir jvm  
+sudo mv -f /home/hadoop/jdk1.8.0_211 /usr/lib/jvm  
+ 
+ 
+ 
+/home/hadoop/.bashrc 파일을 수정하여 환경변수 JAVA_HOME을 등록한다
+
+export JAVA_HOME="/usr/lib/jvm/jdk1.8.0_211"
+export PATH=$PATH:$JAVA_HOME"/bin"
+
+source /home/hadoop/.bashrc
+Hadoop-env.sh에서 /etc/profile의 자바 경로를 제대로 인식 못하는 경우를 경험했기 때문에 .bashrc 의 환경변수를 설정한다.  
+server02 ~server05 모두 jdk를 옮긴 후 환경변수를 수정해줘야한다.  
+
+
+scp /home/hadoop/.bashrc server02 ~ server05
+ssh server02 “source .bashrc”
+
+java -version    설치확인 및 환경변수 확인을 위한 명령
+
+
+//각 서버마다 똑같이 설정해줘야 한다. 똑 같은 위치에 java 전송   
+ssh root@server02 "mkdir /usr/lib/jvm"   ~server05까지  
+scp -r /home/hadoop/jdk1.8.0_221 root@server02:/usr/lib/jvm   ~server05 까지  
+
+root 로그인은 root계정의 비밀번호를 설정하고 ssh로 root로그인 옵션을 허용해줘야 가능
+ 
+
+
