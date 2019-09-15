@@ -1,3 +1,6 @@
+책이나 다른 블로그에서 보면 각 Ubuntu(hadoop용)서버에 zookeeper 계정을 각각 추가하는 방법을 기술해놨다.
+하지만 여기서는 그냥 각 hadoop서버의 hadoop계정 내에 zookeeper애플리케이션을 설치하는 방법으로 진행한다.
+
 wget http://apache.mirror.cdnetworks.com/zookeeper/zookeeper-3.4.14/zookeeper-3.4.14.tar.gz
 tar xvfz zookeeper-3.4.13.tar.gz
 cd /home/hadoop/zookeeper-3.4.13/conf
