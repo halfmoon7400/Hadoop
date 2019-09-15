@@ -17,7 +17,6 @@ network:
         addresses : [8.8.8.8, 8.8.4.4]
   version: 2
 
-
 각 서버의 /etc/hosts 파일에 ssh로 연결할 서버들의 hostname과 IP주소 저장  
 192.168.58.151    server01    vmware 네트워크 설정에서 bridge 모드로 변경한다  
 192.168.58.152    server02    주의! 공유기의 대표ip를 참고하여 해당 공유기에 맞도록 수동ip번호를 지정  
@@ -31,7 +30,7 @@ sudo passwd root
 <- 새롭게 사용할 root의 비밀번호를 입력한다.  
 <- 새로운 root 비밀번호를 위와 동일하게 입력한다.  
   
-# H1 HostName 수정  
+# HostName 수정  
 root권한으로  
 vi /etc/hostname
 server00 	 원하는 서버이름으로 변경 후 저장
@@ -39,3 +38,36 @@ vi /etc/hosts
 127.0.0.1        server00    원하는 서버이름으로 변경 후 저장
 vi /etc/cloud/cloud.cfg
 preserve_hostname : true   false 에서 true로 변경해준다. 
+
+
+# SSH 설정
+sudo apt-get install openssh-server -y    
+ssh-keygen -t rsa	  #(공개키 암호화) 방식으로 암호생성을 의미합니다.
+해당 계정의 home 디렉토리에서 .ssh 디렉토리에 key관련 파일들이 생성됩니다.
+ 
+ 
+id_rsa는 공개되어서는 안되는 private key(비밀키)이고 id_rsa.pub은 public key (공개키) 입니다. 
+server01의 authorized_keys에 server02의 id_rsa.pub을 추가합니다. 마찬가지로
+server02의 authorized_keys 에 server01의 id_rsa.pub을 추가합니다. 
+즉 앞으로 분산 및 병렬 처리를 할 때 각 서버들간의 네트워크가 문제없이 오가기 위해서는 
+server01 ~server05까지의 각 서버의 id_rsa.pub 모두를 authorized_keys에 추가하고 
+이 authorized_keys를 모든 서버가 가지고 있도록 해야 합니다.
+
+server01에서 생성한authorized_keys를 server02 ~05의 /home/hadoop/.ssh/에 전송
+scp .ssh/authorized_keys server02:/home/hadoop/.ssh/
+.... server03 ~ server04
+
+ 
+
+이후 각 서버간 연결이 원활함을 알 수 있습니다.
+ 
+
+# ROOT 계정 ssh로 접근 허용
+openssh-server가 설치되어있는 상태에서 진행
+sudo vi /etc/ssh/sshd_config
+ 
+sudo service ssh restart
+server01 ~ server05 까지 진행해준다
+
+
+
