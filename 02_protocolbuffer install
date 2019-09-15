@@ -1,0 +1,33 @@
+# 프로토콜 버퍼 설치
+
+https://github.com/protocolbuffers/protobuf/releases?after=v2.6.1
+홈페이지의 2.5.0버전인 protobuf-2.5.0.tar.gz를 다운받는다.
+
+wget https://github.com/protocolbuffers/protobuf/releases/download/v2.5.0/protobuf-2.5.0.tar.gz
+  
+mv protobuf-2.5.0.tar.gz /usr/local
+su root
+tar xvfz protobuf-2.5.0.tar.gz
+cd protobuf-2.5.0
+./configure
+make
+make install
+
+protoc –version <- 설치가 잘 되었는지 체크 
+
+
+error
+“protoc: error while loading shared libraries: libprotoc.so.8: cannot open shared object file: no such file or directory”
+지우고 재설치 
+
+
+sudo make uninstall
+sudo make distclean
+sudo make clean
+./configure --prefix=/usr
+
+혹은
+sudo ldconfig
+
+
+server02 ~ server05까지 동일하게 진행한다.
