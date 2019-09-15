@@ -12,6 +12,7 @@ vi /home/hadoop/hadoop-2.7.2/etc/hadoop/Hadoop.env.sh
 export JAVA_HOME=/usr/lib/jvm/jdk1.8.0_211
 export HADOOP_PID_DIR=/home/hadoop/hadoop-2.7.2/pids
 export HADOOP_SECURE_DN_PID_DIR=${HADOOP_PID_DIR}
+위 세개의 주석을 지우고 기존의 config에서 추가적으로 활성화한다
 
 2)	master수정 (HA모드는 master 기입X)
 3)	slaves 수정
