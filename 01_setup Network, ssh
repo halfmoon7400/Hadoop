@@ -1,0 +1,41 @@
+# Netplan 설정
+192.168.58.151    server01  
+192.168.58.152    server02  
+192.168.58.153    server03  
+192.168.58.153    server04  
+
+vi /etc/netplan/50-cloud-init.yaml 
+
+network:
+> ethernets:
+>> ens33:
+>>> dhcp4: no
+>>> dhcp6: no
+>>> addresses : [192.168.58.151/24]
+>>> gateway4 : 192.168.58.2
+>>> nameservers:
+>>>> addresses : [8.8.8.8, 8.8.4.4]
+> version: 2
+
+
+각 서버의 /etc/hosts 파일에 ssh로 연결할 서버들의 hostname과 IP주소 저장  
+192.168.58.151    server01    vmware 네트워크 설정에서 bridge 모드로 변경한다  
+192.168.58.152    server02    주의! 공유기의 대표ip를 참고하여 해당 공유기에 맞도록 수동ip번호를 지정  
+192.168.58.153    server03  
+192.168.58.154    server04  
+  
+  
+# Root 계정 비밀번호 생성  
+sudo passwd root  
+<- 기존 sudo계정인 hadoop의 비밀번호를 먼저 입력한다.  
+<- 새롭게 사용할 root의 비밀번호를 입력한다.  
+<- 새로운 root 비밀번호를 위와 동일하게 입력한다.  
+  
+# H1 HostName 수정  
+root권한으로  
+vi /etc/hostname
+server00 	 원하는 서버이름으로 변경 후 저장
+vi /etc/hosts
+127.0.0.1        server00    원하는 서버이름으로 변경 후 저장
+vi /etc/cloud/cloud.cfg
+preserve_hostname : true   false 에서 true로 변경해준다. 
