@@ -1,3 +1,11 @@
+# 개발도구 패키지 설치  
+sudo apt-get install build-essential  
+나머지 서버에도 동일하게 패키지 설치.  
+ssh root@server02 “apt-get install build-essential -y” … ssh root@server05 “apt-get install build-essential -y”  
+위 작업이 진행되기 위해서는 ubuntu의 ssh를 통한 root 접속을 허락하는 작업이 필요합니다.  
+sudo vi /etc/ssh/sshd_config 의 #PermitRootLogin prohibit-password 중 prohibit-password  yes (주석제거)  
+  
+  
 # 프로토콜 버퍼 설치
 
 https://github.com/protocolbuffers/protobuf/releases?after=v2.6.1
