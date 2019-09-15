@@ -7,9 +7,9 @@
 vi /etc/netplan/50-cloud-init.yaml 
 
 network:
-> ethernets:
->> ens33:
->>> dhcp4: no
+>ethernets:
+>>ens33:
+>>>dhcp4: no
 >>> dhcp6: no
 >>> addresses : [192.168.58.151/24]
 >>> gateway4 : 192.168.58.2
