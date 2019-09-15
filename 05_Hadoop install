@@ -1,0 +1,205 @@
+# Hadoop 설치(압축해제)
+wget http://mirror.apache-kr.org/hadoop/common/hadoop-2.7.2/hadoop-2.7.2.tar.gz
+
+cd /home/hadoop/
+tar xvfz Hadoop-2.7.2.tar.gz
+
+
+
+# hadoop 환경설정 파일 수정
+1)	hadoop.env.sh 
+vi /home/hadoop/hadoop-2.7.2/etc/hadoop/Hadoop.env.sh
+export JAVA_HOME=/usr/lib/jvm/jdk1.8.0_211
+export HADOOP_PID_DIR=/home/hadoop/hadoop-2.7.2/pids
+
+2)	master수정 (HA모드는 master 기입X)
+3)	slaves 수정
+vi /home/hadoop/hadoop-2.7.2/etc/hadoop/slaves
+server01
+server02
+server03
+server04
+
+4)	core-site.xml
+<configuration>
+	<property>
+		<name>fs.defaultFS</name>
+		<value>hdfs://hadoop-cluster</value>
+	</property>
+	<property>
+		<name>ha.zookeeper.quorum</name>
+		<value>server01:2181,server02:2181,server03:2181,server04:2181</value>
+	</property>
+</configuration>
+
+5)	hdfs-site.xml
+
+<configuration>
+	<property>
+		<name>dfs.namenode.name.dir</name>
+		<value>/home/hadoop/data/dfs/namenode</value>
+	</property>
+	<property>
+		<name>dfs.datanode.data.dir</name>
+		<value>/home/hadoop/data/dfs/datanode</value>
+	</property>
+	<property>
+		<name>dfs.journalnode.edits.dir</name>
+		<value>/home/hadoop/data/dfs/journalnode</value>
+	</property>
+	<property>
+		<name>dfs.nameservices</name>
+		<value>hadoop-cluster</value>
+	</property>
+	<property>
+		<name>dfs.ha.namenodes.hadoop-cluster</name>
+		<value>nn1,nn2</value>
+	</property>
+	<property>
+		<name>dfs.namenode.rpc-address.hadoop-cluster.nn1</name>
+		<value>server01:8020</value>
+	</property>
+	<property>
+		<name>dfs.namenode.rpc-address.hadoop-cluster.nn2</name>
+		<value>server02:8020</value>
+	</property>
+	<property>
+		<name>dfs.namenode.http-address.hadoop-cluster.nn1</name>
+		<value>server01:50070</value>
+	</property>
+	<property>
+		<name>dfs.namenode.http-address.hadoop-cluster.nn2</name>
+		<value>server02:50070</value>
+	</property>
+	<property>
+		<name>dfs.namenode.shared.edits.dir</name>
+		<value>qjournal://server01:8485;server02:8485;server03:8485;server04:8485/hadoop-cluster</value>
+	</property>
+	<property>
+		<name>dfs.client.failover.proxy.provider.hadoop-cluster</name>
+		<value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
+	</property>
+	<property>
+		<name>dfs.ha.fencing.methods</name>
+		<value>sshfence</value>
+	</property>
+	<property>
+		<name>dfs.ha.fencing.ssh.private-key-files</name>
+		<value>/home/hadoop/.ssh/id_rsa</value>
+	</property>
+	<property>
+		<name>dfs.ha.automatic-failover.enabled</name>
+		<value>true</value>
+	</property>
+</configuration>
+
+
+6)	yarn-stie.xml
+<configuration>
+	<property>
+		<name>yarn.nodemanager.aux-services</name>
+		<value>mapreduce_shuffle</value>
+	</property>
+	<property>
+		<name>yarn.nodemanager.aux-services.mapreduce_shuffle.class</name>
+		<value>org.apache.hadoop.mapred.ShuffleHandler</value>
+	</property>
+	<property>
+		<name>yarn.nodemanager.local-dirs</name>
+		<value>/home/hadoop/data/yarn/nm-local-dir</value>
+	</property>
+	<property>
+		<name>yarn.resourcemanager.fs.state-store.uri</name>
+		<value>/home/hadoop/data/yarn/system/rmstore</value>
+	</property>
+	<property>
+		<name>yarn.resourcemanager.hostname</name>
+		<value>server01</value>
+	</property>
+	<property>
+		<name>yarn.web-proxy.address</name>
+		<value>0.0.0.0:8089</value>
+	</property>
+	<property>
+		<name>yarn.nodemanager.vmem-check-enabled</name>
+		<value>false</value>
+	</property>
+</configuration>
+
+
+ 7)	Hadoop 환경변수 설정
+vi ~/.bashrc
+export JAVA_HOME="/usr/lib/jvm/jdk1.8.0_211"
+export PATH=$PATH:$JAVA_HOME"/bin"
+export HADOOP_HOME="/home/hadoop/hadoop-2.7.2"
+export PATH=$PATH:$HADOOP_HOME
+export HADOOP_CONF_DIR=/home/hadoop/hadoop-2.7.2/etc/hadoop/
+
+======================================설치완료======================================
+
+
+# hadoop 환경설정 이후 실행 명령어
+(이전에 hadoop을 실행한 이력이 있고 초기화 상태로 실행하고 싶다면
+home/hadoop/ 경로에 있는 data 디렉토리를 server01 ~ server04 까지 전부 삭제해야한다.
+
+이전에 hadoop을 실행헀고 HDFS에 업로드 했던 파일을 보존하여 hadoop을 실행하고 싶으면
+./hadoop-2.7.2/sbin/start-all.sh 
+그냥 모든 시작을 하면 된다
+)
+
+
+server01 ~ server04 :
+zookeeper /bin/zkServer.sh start
+모든 서버 zookeeper on상태에서
+
+server01:
+hadoop-2.7.2/bin/hdfs zkfc -formatZK
+hadoop-2.7.2/sbin/hadoop-daemon.sh start journalnode
+
+ssh server02 "hadoop-2.7.2/sbin/hadoop-daemon.sh start journalnode"
+.. (server02 ~ server04 )
+hadoop-2.7.2/bin/hdfs namenode -format
+hadoop-2.7.2/sbin/hadoop-daemons.sh start namenode
+hadoop-2.7.2/sbin/hadoop-daemons.sh start zkfc
+hadoop-2.7.2/sbin/hadoop-daemon.sh start datanode
+ssh server02 "hadoop-2.7.2/sbin/hadoop-daemon.sh start datanode"
+...  (server02 ~ server04)
+
+server02:
+hadoop-2.7.2/bin/hdfs namenode -bootstrapStandby
+
+hadoop-2.7.2/sbin/hadoop-daemon.sh  start namenode
+hadoop-2.7.2/sbin/hadoop-daemon.sh  start zkfc
+
+server01:
+hadoop-2.7.2/sbin/start-yarn.sh
+hadoop-2.7.2/sbin/mr-jobhistory-daemon.sh start historyserver
+ 
+각 서버 (server01 ~ server04) 에서 jps 명령어 실행 시
+server01: JobHistoryServer, QuorumPeerMain, JournalNode, NameNode, DFSZKFailoverController, DataNode
+server02: QuorumPeerMain, JournalNode, NameNode, DFSZKFailoverController, DataNode
+server03: QuorumPeerMain, JournalNode, DataNode
+server04: QuorumPeerMain, JournalNode, DataNode
+
+yarn을 실행시시킨다면 더 많은 프로세서가 동작할 것이다.
+
+
+# FailoverControl 보기 위해서는
+server01의 Namenode 를 Kill -9 (jobNumber)
+server01 에서hadoop-2.7.2/sbin/hadoop-daemon.sh start namenode 
+이후 브라우저 http://server01:50070 과 http://server02:50070 chrome내에서 확인
+server02 가 standby --> active 변경된다.
+이 때, 브라우저를 구동하는 운영체제의 위치는 vmware 내에 ubuntu-desktop이고
+ip주소도 hadoop 서버들과 같은 서브넷에 위치해야한다.  ex) 192.168.58.111
+
+vmware 외부의 윈도우의 브라우져에서 확인하기 위해서는 ssh터널링을 사용하면 된다
+
+ 
+ 
+# HDFS에 디렉토리 생성 및 파일 업로드 명령어 예제 
+ 
+hadoop-2.7.2/bin/hdfs dfs -mkdir /user
+hadoop-2.7.2/bin/hdfs dfs -mkdir /user/hadoop
+hadoop-2.7.2/bin/hdfs dfs -mkdir /user/hadoop/conf
+hadoop-2.7.2/bin/hdfs dfs -put /home/hadoop/hadoop-2.7.2/etc/hadoop/hadoop-env.sh conf
+
