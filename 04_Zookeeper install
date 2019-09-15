@@ -1,0 +1,47 @@
+wget http://apache.mirror.cdnetworks.com/zookeeper/zookeeper-3.4.14/zookeeper-3.4.14.tar.gz
+tar xvfz zookeeper-3.4.13.tar.gz
+cd /home/hadoop/zookeeper-3.4.13/conf
+
+기존의 zoo.sample.cfg 를 복사해서 사용한다.
+
+cp zoo.sample.cfg zoo.cfg
+vi zoo.cfg
+
+dataDir=/home/hadoop/zookeeper-3.4.13/data
+clientPort=2181
+server.1=server01:2888:3888
+server.2=server02:2888:3888
+server.3=server03:2888:3888
+server.4=server04:2888:3888
+
+cfg 파일에 지정한 dataDir에 따라 home/hadoop/zookeeper-3.4.13에 data 디렉토리를 생성한다
+cd /home/hadoop/zookeeper-3.4.13
+mkdir data
+
+
+압축을 푼 디렉토리를 서버마다 전송한다.
+scp -r zookeeper-3.4.13 server01:/home/hadoop/   ...  scp -r zookeeper-3.4.13 server04:/home/hadoop/
+
+server01의 zookeeper-3.4.13내에 생성된 data 경로에 myid 파일을 생성하고 1을 기입한다
+
+vi myid
+myid 내부에는 1 이라는 숫자만 기입한다.
+
+server02 ~04까지 /home/hadoop/zookeeper-3.4.13/data각자의 서버 이름에 맞게 2 ~ 4 를 기입한다
+
+zookeeper 실행은
+./zookeeper-3.4.14/bin/zkServer.sh start 를 server01 ~ server02 까지 배쉬쉘에 입력한다
+ssh 명령어로 원격실행이 안되서 직접 가서 실행시켰다 
+ssh server02 
+./zookeeper-3.4.14/bin/zkServer.sh start
+ssh server03
+./zookeeper-3.4.14/bin/zkServer.sh start
+ssh server04
+./zookeeper-3.4.14/bin/zkServer.sh start
+
+제대로 동작하는지 확인하기 위해서는 다음의 명령어를 입력한다
+./zookeeper-3.4.14/bin/zkServer.sh status 
+follower 혹은  leader 가 상태로 출력될 것이다
+
+zookeeper는 leader mode 와 follower mode 두가지가 있는데 어떤 server가 leader mode로 동작 할지는 랜덤이라고 한다.
+
